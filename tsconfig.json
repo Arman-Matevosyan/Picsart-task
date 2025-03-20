@@ -4,7 +4,6 @@
   "references": [{ "path": "./tsconfig.node.json" }],
   "compilerOptions": {
     "paths": {
-      "@/*": ["./src/*"],
       "@design-system/*": ["./src/@design-system/*"],
       "@features/*": ["./src/@features/*"],
       "@shared/*": ["./src/@shared/*"]
