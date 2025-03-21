@@ -1,3 +1,4 @@
+import { ApiSources } from "@shared/constants";
 import { IPexelsPhoto, IPexelsPhotoResponse, IPhoto } from "@shared/types";
 import axios from "axios";
 
@@ -28,7 +29,7 @@ const mapPexelsPhoto = (photo: IPexelsPhoto): IPhoto => {
     photographerUrl: photo.photographer_url,
     avgColor: photo.avg_color,
     liked: photo.liked,
-    source: "pexels",
+    source: ApiSources.Pexels,
   };
 };
 

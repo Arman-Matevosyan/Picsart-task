@@ -1,3 +1,4 @@
+import { ApiSources } from "@shared/constants";
 import { IPhoto, IUnsplashPhoto, IUnsplashSearchResponse } from "@shared/types";
 import axios from "axios";
 
@@ -30,7 +31,7 @@ const mapUnsplashPhoto = (photo: IUnsplashPhoto): IPhoto => {
     dateAdded: photo.created_at,
     description: photo.description,
     liked: photo.liked_by_user,
-    source: "unsplash",
+    source: ApiSources.Unsplash,
   };
 };
 
