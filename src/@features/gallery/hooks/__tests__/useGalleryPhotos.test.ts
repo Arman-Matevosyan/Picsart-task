@@ -33,7 +33,7 @@ describe("useGalleryPhotos", () => {
 
     await waitFor(() => expect(result.current.isSuccess).toBe(true));
 
-    expect(api.fetchCuratedPhotos).toHaveBeenCalledWith(1);
+    expect(api.fetchCuratedPhotos).toHaveBeenCalledWith(1, 12);
 
     expect(result.current.data?.pages[0]).toEqual(mockPhotos);
   });
@@ -51,7 +51,7 @@ describe("useGalleryPhotos", () => {
       expect(api.fetchCuratedPhotos).toHaveBeenCalledTimes(2)
     );
 
-    expect(api.fetchCuratedPhotos).toHaveBeenCalledWith(2);
+    expect(api.fetchCuratedPhotos).toHaveBeenCalledWith(2, 12);
   });
 
   it("should handle query error", async () => {
