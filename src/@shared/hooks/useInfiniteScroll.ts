@@ -1,7 +1,6 @@
 import { useCallback, useEffect, useRef } from "react";
 
 interface UseInfiniteScrollOptions {
-  containerRef: React.RefObject<HTMLElement>;
   loading: boolean;
   hasNextPage: boolean | undefined;
   onLoadMore: () => void;
@@ -10,94 +9,48 @@ interface UseInfiniteScrollOptions {
   disabled?: boolean;
 }
 
-/**
- * infinite scrolling hook by observing the last child of a container.
- */
 export const useInfiniteScroll = ({
-  containerRef,
   loading,
   hasNextPage,
   onLoadMore,
-  rootMargin = "0px 0px 400px 0px",
+  rootMargin = "0px 0px 400px 0px", // load more when item is 400px from viewport bottom
   threshold = 0.1,
   disabled = false,
 }: UseInfiniteScrollOptions) => {
-  const intersectionObserverRef = useRef<IntersectionObserver | null>(null);
-  const mutationObserverRef = useRef<MutationObserver | null>(null);
-  const currentTargetRef = useRef<Element | null>(null);
+  const observerRef = useRef<HTMLDivElement>(null);
 
-  const handleIntersect = useCallback(
+  const handleObserver = useCallback(
     (entries: IntersectionObserverEntry[]) => {
       const [entry] = entries;
+
+      // if entry is intersecting, not currently loading, has more pages, and not disabled
       if (entry?.isIntersecting && !loading && hasNextPage && !disabled) {
+        // trigger the load more callback
         onLoadMore();
       }
     },
-    [loading, hasNextPage, disabled, onLoadMore]
+    [loading, hasNextPage, onLoadMore, disabled]
   );
 
   useEffect(() => {
-    const container = containerRef?.current;
-    if (!container || disabled || loading || !hasNextPage) return;
+    if (loading || !hasNextPage || disabled) return;
 
-    const cleanupObservers = () => {
-      if (mutationObserverRef.current) {
-        mutationObserverRef.current.disconnect();
-        mutationObserverRef.current = null;
-      }
-      if (intersectionObserverRef.current) {
-        intersectionObserverRef.current.disconnect();
-        intersectionObserverRef.current = null;
-      }
-      currentTargetRef.current = null;
-    };
+    const element = observerRef.current;
+    if (!element) return;
 
-    cleanupObservers();
-
-    // setup MutationObserver to track child list changes
-    const mutationObserver = new MutationObserver(() => {
-      const lastChild = container.lastElementChild;
-      if (lastChild && lastChild !== currentTargetRef.current) {
-        // disconnect previous intersection observer if target change
-        if (currentTargetRef.current && intersectionObserverRef.current) {
-          intersectionObserverRef.current.unobserve(currentTargetRef.current);
-        }
-        currentTargetRef.current = lastChild;
-        if (intersectionObserverRef.current) {
-          intersectionObserverRef.current.observe(lastChild);
-        }
-      }
-    });
-
-    mutationObserver.observe(container, { childList: true });
-    mutationObserverRef.current = mutationObserver;
-
-    // setup IntersectionObserver with container as root
-    const intersectionObserver = new IntersectionObserver(handleIntersect, {
-      root: container,
+    const observer = new IntersectionObserver(handleObserver, {
       rootMargin,
       threshold,
     });
-    intersectionObserverRef.current = intersectionObserver;
 
-    const initialLastChild = container.lastElementChild;
-    if (initialLastChild) {
-      currentTargetRef.current = initialLastChild;
-      intersectionObserver.observe(initialLastChild);
-    }
+    observer.observe(element);
 
     return () => {
-      cleanupObservers();
+      observer.disconnect();
     };
-  }, [
-    containerRef,
-    disabled,
-    loading,
-    hasNextPage,
-    rootMargin,
-    threshold,
-    handleIntersect,
-  ]);
+  }, [handleObserver, loading, hasNextPage, rootMargin, threshold, disabled]);
+
+  return observerRef;
 };
 
 export default useInfiniteScroll;

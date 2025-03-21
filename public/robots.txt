@@ -1,0 +1,6 @@
+# Sitemap location - for local working, change on prod
+Sitemap: http://localhost:5173/sitemap.xml
+
+# For local working block all robots, change this on prod
+# User-agent: *
+# Disallow: /

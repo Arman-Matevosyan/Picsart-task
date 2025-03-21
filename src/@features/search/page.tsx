@@ -4,13 +4,11 @@ import { MasonryGrid } from "@shared/components/MasonryGrid";
 import { PageHeader } from "@shared/components/PageHeader";
 import { useInfiniteScroll } from "@shared/hooks";
 import { IPhoto } from "@shared/types";
+import { extractPhotosFromPages } from "@shared/utils";
 import { FC, useCallback } from "react";
 import { useSearchParams } from "react-router-dom";
 import styled from "styled-components";
-import {
-  extractPhotosFromPages,
-  useSearchPhotos,
-} from "./hooks/useSearchPhotos";
+import { useSearchPhotos } from "./hooks/useSearchPhotos";
 
 const Container = styled.div`
   max-width: 1400px;

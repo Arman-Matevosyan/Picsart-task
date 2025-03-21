@@ -9,7 +9,14 @@ interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
   children: ReactNode;
 }
 
-const BaseButton = styled.button<ButtonProps>`
+// using $variant and $size for styled components not to pass them to DOM
+interface StyledButtonProps {
+  $variant?: "primary" | "secondary" | "outlined" | "text";
+  $size?: "small" | "medium" | "large";
+  $fullWidth?: boolean;
+}
+
+const BaseButton = styled.button<StyledButtonProps>`
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -21,7 +28,7 @@ const BaseButton = styled.button<ButtonProps>`
   transition: all 0.2s ease;
 
   ${(props) => {
-    switch (props.size) {
+    switch (props.$size) {
       case "small":
         return css`
           padding: 6px 16px;
@@ -41,7 +48,7 @@ const BaseButton = styled.button<ButtonProps>`
   }}
 
   ${(props) =>
-    props.fullWidth &&
+    props.$fullWidth &&
     css`
       width: 100%;
     `}
@@ -54,7 +61,7 @@ const BaseButton = styled.button<ButtonProps>`
   ${(props) => {
     const theme = props.theme as Theme;
 
-    switch (props.variant) {
+    switch (props.$variant) {
       case "secondary":
         return css`
           background-color: ${theme.colors.secondary};
@@ -114,7 +121,12 @@ export const Button: FC<ButtonProps> = ({
   ...props
 }) => {
   return (
-    <BaseButton variant={variant} size={size} fullWidth={fullWidth} {...props}>
+    <BaseButton
+      $variant={variant}
+      $size={size}
+      $fullWidth={fullWidth}
+      {...props}
+    >
       {children}
     </BaseButton>
   );
