@@ -7,7 +7,7 @@ import {
 import { useInfiniteScroll } from "@shared/hooks";
 import { IPhoto } from "@shared/types";
 import { extractPhotosFromPages } from "@shared/utils";
-import { FC, useCallback } from "react";
+import { FC, useCallback, useMemo } from "react";
 import styled from "styled-components";
 import { useGalleryPhotos } from "./hooks";
 
@@ -35,11 +35,22 @@ export const GalleryPage: FC = () => {
     error,
   } = useGalleryPhotos();
 
-  const photos = extractPhotosFromPages(data);
+  // extract and memoize photos no unnecessary re-renders
+  const photos = useMemo(() => extractPhotosFromPages(data), [data]);
+
+  // memoize the renderPhoto no unnecessary re-renders
   const renderPhoto = useCallback(
-    (photo: IPhoto) => <ImageCard photo={photo} />,
+    (photo: IPhoto, index: number) => (
+      <ImageCard
+        photo={photo}
+        index={index}
+        // mark first few photos as high priority
+        isPriority={index < 2}
+      />
+    ),
     []
   );
+
   const loadMoreRef = useInfiniteScroll({
     loading: isLoading || isFetchingNextPage,
     hasNextPage,

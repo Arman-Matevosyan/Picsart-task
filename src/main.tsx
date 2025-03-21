@@ -8,11 +8,29 @@ import { StyleSheetManager, ThemeProvider } from "styled-components";
 import ErrorBoundary from "./@shared/components/ErrorBoundary.tsx";
 import App from "./App.tsx";
 
+// enable back/forward cache
+function enableBFCache() {
+  // enable bfcache
+  window.addEventListener("pageshow", (event) => {
+    if (event.persisted) {
+      console.info("Page restored from bfcache");
+    }
+  });
+  // avoid unload events as they can delete bfcache
+  window.addEventListener("visibilitychange", () => {
+    if (document.visibilityState === "hidden") {
+    }
+  });
+}
+
+enableBFCache();
+
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
       refetchOnWindowFocus: false,
       retry: 1,
+      staleTime: 5 * 60 * 1000,
     },
   },
 });

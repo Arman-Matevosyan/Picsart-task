@@ -6,6 +6,8 @@ import styled from "styled-components";
 
 interface ImageCardProps {
   photo: IPhoto;
+  isPriority?: boolean;
+  index?: number;
 }
 
 const Card = styled(Link)`
@@ -60,15 +62,29 @@ const Source = styled.span`
   opacity: 0.8;
 `;
 
-export const ImageCard: FC<ImageCardProps> = ({ photo }) => {
-  const aspectRatio = photo.width / photo.height;
+export const ImageCard: FC<ImageCardProps> = ({
+  photo,
+  isPriority = false,
+  index = 0,
+}) => {
+  // only prio first 2 images for LCP or explicitly prio images
+  const isImportantImage = isPriority || index < 2;
+
+  // sm screens: full width, md screens: half width, lg screens: third width
+  const sizes = "(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw";
+
+  const imageSrc = isImportantImage ? photo.src.medium : photo.src.small;
 
   return (
     <Card to={`/photo/${photo.source}/${photo.id}`}>
       <Image
-        src={photo.src.medium}
-        alt={photo.alt}
-        aspectRatio={aspectRatio}
+        src={imageSrc}
+        alt={photo.alt || `Photo by ${photo.photographer}`}
+        width={photo.width}
+        height={photo.height}
+        priority={isImportantImage}
+        sizes={sizes}
+        fetchPriority={isImportantImage ? "high" : "auto"}
         rounded
       />
       <ImageInfo className="image-info">

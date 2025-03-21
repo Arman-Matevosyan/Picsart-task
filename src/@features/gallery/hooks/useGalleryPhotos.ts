@@ -11,7 +11,10 @@ export const useGalleryPhotos = () => {
     queryFn: ({ pageParam }) => fetchCuratedPhotos(pageParam as number),
     initialPageParam: 1,
     getNextPageParam: (lastPage) => lastPage.nextPage,
-    staleTime: 5 * 60 * 1000,
+    staleTime: 10 * 60 * 1000,
+    gcTime: 30 * 60 * 1000, // 30 minutes
     refetchOnWindowFocus: false,
+    refetchOnMount: false,
+    refetchOnReconnect: false,
   });
 };

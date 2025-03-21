@@ -6,3 +6,7 @@ dist
 
 # Environment variables
 .env
+
+# Stats and performance reports
+stats.html
+report/

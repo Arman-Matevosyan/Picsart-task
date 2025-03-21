@@ -13,6 +13,16 @@
       content="photos, gallery, images, picsart, photography"
     />
     <meta name="robots" content="index, follow" />
+
+    <!-- DNS prefetch and preconnect improve load time -->
+    <link rel="preconnect" href="https://images.unsplash.com" crossorigin />
+    <link rel="preconnect" href="https://images.pexels.com" crossorigin />
+    <link rel="dns-prefetch" href="https://images.unsplash.com" />
+    <link rel="dns-prefetch" href="https://images.pexels.com" />
+
+    <!-- preload the main entry script to reduce CLS -->
+    <link rel="modulepreload" href="/src/main.tsx" as="script" />
+
     <title>Picsart Gallery - Photo Collection and Image Library</title>
   </head>
   <body>
