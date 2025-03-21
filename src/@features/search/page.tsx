@@ -1,96 +1,94 @@
-import { Button } from "@design-system/components";
-import { ChangeEvent, FC, FormEvent, useEffect, useRef, useState } from "react";
-import { useLocation } from "react-router-dom";
+import { MasonryGridSkeleton } from "@shared/components";
+import { ImageCard } from "@shared/components/ImageCard";
+import { MasonryGrid } from "@shared/components/MasonryGrid";
+import { PageHeader } from "@shared/components/PageHeader";
+import { useInfiniteScroll } from "@shared/hooks";
+import { IPhoto } from "@shared/types";
+import { FC, useCallback } from "react";
+import { useSearchParams } from "react-router-dom";
 import styled from "styled-components";
-import { useSearch } from "./hooks/useSearch";
+import {
+  extractPhotosFromPages,
+  useSearchPhotos,
+} from "./hooks/useSearchPhotos";
 
-const Form = styled.form`
-  display: flex;
-  width: 100%;
-  max-width: 600px;
+const Container = styled.div`
+  max-width: 1400px;
   margin: 0 auto;
-`;
-
-const Input = styled.input`
-  flex: 1;
-  padding: 10px 16px;
-  border: 2px solid ${(props) => props.theme.colors.border};
-  border-radius: ${(props) => props.theme.borderRadius.medium} 0 0
-    ${(props) => props.theme.borderRadius.medium};
-  font-size: 1rem;
-  outline: none;
+  padding: 0 16px;
+  min-height: 100%;
   background-color: ${(props) => props.theme.colors.background};
   color: ${(props) => props.theme.colors.textPrimary};
-  transition: border-color 0.3s ease, background-color 0.3s ease,
-    color 0.3s ease;
+  transition: background-color 0.3s ease, color 0.3s ease;
 
-  &:focus {
-    border-color: ${(props) => props.theme.colors.primary};
+  @media (max-width: 768px) {
+    padding: 0 8px;
   }
 `;
 
-const SearchButton = styled(Button)`
-  border-radius: 0 ${(props) => props.theme.borderRadius.medium}
-    ${(props) => props.theme.borderRadius.medium} 0;
-  margin-left: -1px;
-`;
+export const SearchResultsPage: FC = () => {
+  const [searchParams] = useSearchParams();
+  const query = searchParams.get("q") || "";
 
-/**
- * SearchBar component for searching photos
- * Self-contained component that manages its own state and interactions
- */
-export const Search: FC = () => {
-  const [searchQuery, setSearchQuery] = useState("");
-  const inputRef = useRef<HTMLInputElement>(null);
-  const { handleSearch, query } = useSearch();
-  const location = useLocation();
+  const {
+    data,
+    isLoading,
+    fetchNextPage,
+    hasNextPage,
+    isFetchingNextPage,
+    error,
+  } = useSearchPhotos(query);
 
-  // Initialize search query from URL when on search page
-  useEffect(() => {
-    if (location.pathname === "/search") {
-      const urlQuery = new URLSearchParams(location.search).get("q") || "";
-      if (urlQuery && urlQuery !== searchQuery) {
-        setSearchQuery(urlQuery);
-      }
-    }
-  }, [location.pathname, location.search, searchQuery]);
-
-  // Keep local state in sync with store
-  useEffect(() => {
-    if (query && query !== searchQuery) {
-      setSearchQuery(query);
-    }
-  }, [query, searchQuery]);
-
-  const handleInputChange = (e: ChangeEvent<HTMLInputElement>) => {
-    setSearchQuery(e.target.value);
-  };
-
-  const handleSubmit = (e: FormEvent) => {
-    e.preventDefault();
-
-    if (searchQuery.trim()) {
-      handleSearch(searchQuery.trim());
-      // Blur the input after submitting to hide the keyboard on mobile
-      if (inputRef.current) {
-        inputRef.current.blur();
-      }
-    }
-  };
+  const photos = extractPhotosFromPages(data);
+  const renderPhoto = useCallback(
+    (photo: IPhoto) => <ImageCard photo={photo} />,
+    []
+  );
+  const loadMoreRef = useInfiniteScroll({
+    loading: isLoading || isFetchingNextPage,
+    hasNextPage,
+    onLoadMore: fetchNextPage,
+  });
 
   return (
-    <Form onSubmit={handleSubmit} role="search">
-      <Input
-        ref={inputRef}
-        type="text"
-        value={searchQuery}
-        onChange={handleInputChange}
-        placeholder="Search for photos..."
-        aria-label="Search input"
+    <Container>
+      <PageHeader
+        title={`Search Results: ${query}`}
+        showSearch
+        initialValue={query}
       />
-      <SearchButton type="submit" variant="primary">
-        Search
-      </SearchButton>
-    </Form>
+
+      {error && (
+        <div className="error-message">
+          Error loading search results. Please try again later.
+        </div>
+      )}
+
+      {isLoading ? (
+        <MasonryGridSkeleton />
+      ) : (
+        <>
+          {photos.length === 0 && !error && (
+            <div className="no-results">
+              <h2>No results found</h2>
+              <p>Try a different search term or browse our gallery.</p>
+            </div>
+          )}
+
+          {photos.length > 0 && (
+            <MasonryGrid
+              items={photos}
+              renderItem={renderPhoto}
+              loadingElement={
+                isFetchingNextPage && (
+                  <div className="loading">Loading more images...</div>
+                )
+              }
+              sentinelElement={<div ref={loadMoreRef} />}
+            />
+          )}
+        </>
+      )}
+    </Container>
   );
 };

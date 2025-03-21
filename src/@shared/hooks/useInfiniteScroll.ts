@@ -37,7 +37,7 @@ export const useInfiniteScroll = ({
   );
 
   useEffect(() => {
-    const container = containerRef.current;
+    const container = containerRef?.current;
     if (!container || disabled || loading || !hasNextPage) return;
 
     const cleanupObservers = () => {

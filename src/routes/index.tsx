@@ -1,5 +1,3 @@
-import { ErrorBoundary } from "@shared/components/ErrorBoundary";
-import AppLayout from "@shared/layout/AppLayout";
 import { lazy, Suspense } from "react";
 import { Navigate, RouteObject } from "react-router-dom";
 
@@ -16,7 +14,9 @@ const PhotoDetails = lazy(() =>
 );
 
 const SearchResults = lazy(() =>
-  import("@features/search").then((module) => ({ default: module.Search }))
+  import("@features/search").then((module) => ({
+    default: module.SearchResultsPage,
+  }))
 );
 
 const SuspenseFallback = () => (
@@ -25,53 +25,29 @@ const SuspenseFallback = () => (
   </div>
 );
 
-const PageWrapper = ({
-  Component,
-  layoutProps = {},
-}: {
-  Component: React.LazyExoticComponent<React.ComponentType<any>>;
-  layoutProps?: {
-    title?: string;
-    showSearchBar?: boolean;
-    showBackButton?: boolean;
-  };
-}) => (
-  <ErrorBoundary>
-    <Suspense fallback={<SuspenseFallback />}>
-      <AppLayout {...layoutProps}>
-        <Component />
-      </AppLayout>
-    </Suspense>
-  </ErrorBoundary>
-);
-
 export const routes: RouteObject[] = [
   {
     path: "/",
-    element: <PageWrapper Component={Gallery} />,
+    element: (
+      <Suspense fallback={<SuspenseFallback />}>
+        <Gallery />
+      </Suspense>
+    ),
   },
   {
     path: "/photo/:source/:id",
     element: (
-      <PageWrapper
-        Component={PhotoDetails}
-        layoutProps={{
-          showSearchBar: false,
-          showBackButton: true,
-          title: "Photo Details",
-        }}
-      />
+      <Suspense fallback={<SuspenseFallback />}>
+        <PhotoDetails />
+      </Suspense>
     ),
   },
   {
     path: "/search",
     element: (
-      <PageWrapper
-        Component={SearchResults}
-        layoutProps={{
-          title: "Search Results",
-        }}
-      />
+      <Suspense fallback={<SuspenseFallback />}>
+        <SearchResults />
+      </Suspense>
     ),
   },
   {
@@ -79,5 +55,3 @@ export const routes: RouteObject[] = [
     element: <Navigate to="/" replace />,
   },
 ];
-
-export default routes;
