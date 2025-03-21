@@ -1,4 +1,4 @@
-import { useTheme } from "@shared/contexts/ThemeContext";
+import { useTheme } from "@shared/index";
 import React from "react";
 import styled from "styled-components";
 

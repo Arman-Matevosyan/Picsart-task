@@ -1,16 +1,10 @@
 import { darkTheme, lightTheme } from "@design-system/theme";
-import React, {
-  createContext,
-  ReactNode,
-  useContext,
-  useEffect,
-  useState,
-} from "react";
+import React, { createContext, ReactNode, useEffect, useState } from "react";
 import { ThemeProvider as StyledThemeProvider } from "styled-components";
 
-type ThemeMode = "light" | "dark";
+export type ThemeMode = "light" | "dark";
 
-interface ThemeContextType {
+export interface ThemeContextType {
   mode: ThemeMode;
   toggleTheme: () => void;
   isDark: boolean;
@@ -65,10 +59,5 @@ export const ThemeProvider: React.FC<ThemeProviderProps> = ({ children }) => {
   );
 };
 
-export const useTheme = (): ThemeContextType => {
-  const context = useContext(ThemeContext);
-  if (context === undefined) {
-    throw new Error("useTheme must be used within a ThemeProvider");
-  }
-  return context;
-};
+export { ThemeContext };
+

@@ -114,14 +114,9 @@ export const PhotoDetailsPage: FC = () => {
   }>();
   const navigate = useNavigate();
 
-  // If source or id is missing, redirect to home
-  if (!source || !id) {
-    navigate("/");
-    return null;
-  }
-
+  // define a default source to use if source is invalid
   const validSource =
-    source === ApiSources.Pexels || source === ApiSources.Unsplash
+    source && (source === ApiSources.Pexels || source === ApiSources.Unsplash)
       ? source
       : ApiSources.Pexels;
 
@@ -129,7 +124,12 @@ export const PhotoDetailsPage: FC = () => {
     data: photo,
     isLoading,
     error,
-  } = usePhotoDetails(id, validSource as ApiSources);
+  } = usePhotoDetails(id || "", validSource as ApiSources);
+
+  if (!source || !id) {
+    navigate("/");
+    return null;
+  }
 
   // Get the best available image URL
   const getHighQualityImage = () => {
