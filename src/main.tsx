@@ -1,12 +1,29 @@
 import { theme } from "@design-system/theme";
 import isPropValid from "@emotion/is-prop-valid";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { StrictMode } from "react";
+import { StrictMode, Suspense, lazy } from "react";
 import ReactDOM from "react-dom/client";
 import { BrowserRouter } from "react-router-dom";
 import { StyleSheetManager, ThemeProvider } from "styled-components";
 import ErrorBoundary from "./@shared/components/ErrorBoundary.tsx";
-import App from "./App.tsx";
+
+// lazy load the App
+const App = lazy(() => import("./App.tsx"));
+
+const AppLoading = () => (
+  <div
+    style={{
+      display: "flex",
+      justifyContent: "center",
+      alignItems: "center",
+      height: "100vh",
+      backgroundColor: "#f5f5f5",
+      color: "#333",
+    }}
+  >
+    Loading...
+  </div>
+);
 
 // enable back/forward cache
 function enableBFCache() {
@@ -24,6 +41,18 @@ function enableBFCache() {
 }
 
 enableBFCache();
+
+// create a preconnect link for API domains
+function addPreconnect(domain: string) {
+  const link = document.createElement("link");
+  link.rel = "preconnect";
+  link.href = domain;
+  document.head.appendChild(link);
+}
+
+// preconnect to API domains
+addPreconnect("https://api.unsplash.com");
+addPreconnect("https://api.pexels.com");
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -47,7 +76,9 @@ ReactDOM.createRoot(document.getElementById("root")!).render(
         <StyleSheetManager shouldForwardProp={shouldForwardProp}>
           <ThemeProvider theme={theme}>
             <BrowserRouter>
-              <App />
+              <Suspense fallback={<AppLoading />}>
+                <App />
+              </Suspense>
             </BrowserRouter>
           </ThemeProvider>
         </StyleSheetManager>

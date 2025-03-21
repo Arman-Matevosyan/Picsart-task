@@ -8,6 +8,7 @@
     "build": "tsc -b && vite build",
     "lint": "eslint .",
     "preview": "vite preview",
+    "preview:compressed": "vite build && serve -s dist",
     "performance": "node performance-test.cjs"
   },
   "dependencies": {

@@ -39,7 +39,7 @@ export const SearchResultsPage: FC = () => {
 
   const photos = extractPhotosFromPages(data);
   const renderPhoto = useCallback(
-    (photo: IPhoto) => <ImageCard photo={photo} />,
+    (photo: IPhoto) => <ImageCard key={photo.id} photo={photo} />,
     []
   );
   const loadMoreRef = useInfiniteScroll({

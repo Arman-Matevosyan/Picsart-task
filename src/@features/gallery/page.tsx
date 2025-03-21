@@ -42,6 +42,7 @@ export const GalleryPage: FC = () => {
   const renderPhoto = useCallback(
     (photo: IPhoto, index: number) => (
       <ImageCard
+        key={photo.id}
         photo={photo}
         index={index}
         // mark first few photos as high priority

@@ -32,6 +32,12 @@ const GridContainer = styled.div`
   }
 `;
 
+const ColumnContainer = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+`;
+
 // create a memoized column component no to re-renders when other columns change
 const MasonryColumn = memo(
   ({
@@ -46,13 +52,13 @@ const MasonryColumn = memo(
     columnCount: number;
   }) => {
     return (
-      <div>
+      <ColumnContainer>
         {items.map((item, itemIndex) => {
           // calc the absolute index for priority
           const absoluteIndex = columnIndex + itemIndex * columnCount;
           return renderItem(item, absoluteIndex);
         })}
-      </div>
+      </ColumnContainer>
     );
   }
 );
@@ -75,11 +81,13 @@ export const MasonryGrid = <T,>({
   // pre-calculate columns to minimize DOM updates
   const columns = useMemo(() => {
     const cols: T[][] = Array.from({ length: columnCount }, () => []);
+    const colHeights: number[] = Array(columnCount).fill(0);
 
     // pass items to columns
-    items.forEach((item, i) => {
-      const columnIndex = i % columnCount;
-      cols[columnIndex].push(item);
+    items.forEach((item) => {
+      const shortestColIndex = colHeights.indexOf(Math.min(...colHeights));
+      cols[shortestColIndex].push(item);
+      colHeights[shortestColIndex] += 1;
     });
 
     return cols;

@@ -11,11 +11,14 @@ import { compression } from "vite-plugin-compression2";
  * - Terser minification with aggressive settings
  * - Strategic code splitting for better caching
  * - Bundle analysis for monitoring
+ * - Improved CSS optimization
+ * - Reduced unused JavaScript
  *
  * References:
  * - Vite Official Guide: https://vitejs.dev/guide/build.html
  * - Vite Build Options: https://vitejs.dev/config/build-options.html
- * - Dev.to (Mitchell): https://dev.to/mitchatevs/improving-web-performance-with-code-splitting-and-text-compression-1f3h
+ * - Web.dev - LCP: https://web.dev/lcp/
+ * - Enable Text Compression: https://web.dev/uses-text-compression/
  */
 
 export default defineConfig({
@@ -40,6 +43,7 @@ export default defineConfig({
       open: false,
       gzipSize: true,
       brotliSize: true,
+      filename: "stats.html", // Save stats to a file
     }),
   ],
   resolve: {
@@ -58,6 +62,11 @@ export default defineConfig({
         drop_console: true,
         drop_debugger: true,
         pure_funcs: ["console.log", "console.info", "console.debug"],
+        passes: 2, // multiple for better minification
+        ecma: 2020, //modern syntax
+      },
+      mangle: {
+        safari10: true, // safari compatibility
       },
       format: {
         comments: false, // remove comments
@@ -65,31 +74,60 @@ export default defineConfig({
     },
     // increase chunk size
     chunkSizeWarningLimit: 600,
+    // ensure CSS optimized
+    cssMinify: true,
+    cssCodeSplit: true,
+    // pre-optimized dependencies that don't need processing
+    commonjsOptions: {
+      include: [/node_modules/],
+      extensions: [".js", ".cjs"],
+    },
     rollupOptions: {
       output: {
         // code splitting
         manualChunks: (id) => {
-          // framework chunk - not changes
+          // react core - rarely changes
           if (
             id.includes("node_modules/react/") ||
-            id.includes("node_modules/react-dom/") ||
-            id.includes("node_modules/react-router-dom/")
+            id.includes("node_modules/react-dom/")
           ) {
-            return "vendor-framework";
+            return "vendor-react";
           }
 
-          // libraries chunk - may change with updates
+          // routing - lazy loaded by main.tsx
+          if (id.includes("node_modules/react-router-dom/")) {
+            return "vendor-router";
+          }
+
+          // API/query functionality - only loaded when needed
           if (
-            id.includes("node_modules/styled-components/") ||
             id.includes("node_modules/@tanstack/react-query") ||
             id.includes("node_modules/axios/")
           ) {
-            return "vendor-libs";
+            return "vendor-api";
           }
 
-          // UI components that can  be reused
+          // styling libraries - separate chunk
+          if (id.includes("node_modules/styled-components/")) {
+            return "vendor-styles";
+          }
+
+          // UI components that can be reused
           if (id.includes("src/@design-system/components")) {
             return "ui-components";
+          }
+
+          // feature modules should be in their own chunks
+          if (id.includes("src/@features/gallery")) {
+            return "feature-gallery";
+          }
+
+          if (id.includes("src/@features/photo-details")) {
+            return "feature-photo-details";
+          }
+
+          if (id.includes("src/@features/search")) {
+            return "feature-search";
           }
 
           return null; // default chunk
@@ -98,6 +136,10 @@ export default defineConfig({
         compact: true,
         // ensure smallest bundle sizes
         minifyInternalExports: true,
+        // add content hash for cache
+        entryFileNames: "assets/[name].[hash].js",
+        chunkFileNames: "assets/[name].[hash].js",
+        assetFileNames: "assets/[name].[hash].[ext]",
       },
     },
     // disable sourcemap in production smaller build size
