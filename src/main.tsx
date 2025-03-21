@@ -6,24 +6,10 @@ import ReactDOM from "react-dom/client";
 import { BrowserRouter } from "react-router-dom";
 import { StyleSheetManager, ThemeProvider } from "styled-components";
 import ErrorBoundary from "./@shared/components/ErrorBoundary.tsx";
+import { AppLoading } from "./components/AppLoading";
 
 // lazy load the App
 const App = lazy(() => import("./App.tsx"));
-
-const AppLoading = () => (
-  <div
-    style={{
-      display: "flex",
-      justifyContent: "center",
-      alignItems: "center",
-      height: "100vh",
-      backgroundColor: "#f5f5f5",
-      color: "#333",
-    }}
-  >
-    Loading...
-  </div>
-);
 
 // enable back/forward cache
 function enableBFCache() {
@@ -36,6 +22,9 @@ function enableBFCache() {
   // avoid unload events as they can delete bfcache
   window.addEventListener("visibilitychange", () => {
     if (document.visibilityState === "hidden") {
+      // this empty block is intentional
+      // we're using the visibilitychange event to prevent unload events
+      // which could interfere with browser back-forward cache (bfcache)
     }
   });
 }

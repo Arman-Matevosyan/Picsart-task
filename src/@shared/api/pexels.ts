@@ -18,11 +18,12 @@ const mapPexelsPhoto = (photo: IPexelsPhoto): IPhoto => {
     width: photo.width,
     height: photo.height,
     src: {
-      original: photo.src.original,
-      large: photo.src.large,
-      medium: photo.src.medium,
-      small: photo.src.small,
-      tiny: photo.src.tiny,
+      // ensure we request high quality originals
+      original: photo.src.large2x || photo.src.original,
+      large: photo.src.large2x || photo.src.large,
+      medium: photo.src.large || photo.src.medium,
+      small: photo.src.medium || photo.src.small,
+      tiny: photo.src.small || photo.src.tiny,
     },
     alt: photo.alt || `Photo by ${photo.photographer}`,
     photographer: photo.photographer,

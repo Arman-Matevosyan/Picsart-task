@@ -67,13 +67,15 @@ export const ImageCard: FC<ImageCardProps> = ({
   isPriority = false,
   index = 0,
 }) => {
-  // only prio first 2 images for LCP or explicitly prio images
-  const isImportantImage = isPriority || index < 2;
+  const isImportantImage = isPriority || index < 4;
 
-  // sm screens: full width, md screens: half width, lg screens: third width
+  // Responsive sizes based on viewport and grid layout
+  // - Small screens: full width (100vw)
+  // - Medium screens: half width (50vw)
+  // - Large screens: third width (33vw)
   const sizes = "(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw";
 
-  const imageSrc = isImportantImage ? photo.src.medium : photo.src.small;
+  const imageSrc = isImportantImage ? photo.src.large : photo.src.medium;
 
   return (
     <Card to={`/photo/${photo.source}/${photo.id}`}>
@@ -86,6 +88,7 @@ export const ImageCard: FC<ImageCardProps> = ({
         sizes={sizes}
         fetchPriority={isImportantImage ? "high" : "auto"}
         rounded
+        placeholderColor={photo.avgColor || "#e0e0e0"}
       />
       <ImageInfo className="image-info">
         <Photographer>{photo.photographer}</Photographer>

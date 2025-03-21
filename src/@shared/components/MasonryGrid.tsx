@@ -38,30 +38,31 @@ const ColumnContainer = styled.div`
   gap: 24px;
 `;
 
-// create a memoized column component no to re-renders when other columns change
+function MasonryColumnComponent<T>({
+  items,
+  renderItem,
+  columnIndex,
+  columnCount,
+}: {
+  items: T[];
+  renderItem: (item: T, index: number) => ReactNode;
+  columnIndex: number;
+  columnCount: number;
+}) {
+  return (
+    <ColumnContainer>
+      {items.map((item, itemIndex) => {
+        // calc the absolute index for priority
+        const absoluteIndex = columnIndex + itemIndex * columnCount;
+        return renderItem(item, absoluteIndex);
+      })}
+    </ColumnContainer>
+  );
+}
+
 const MasonryColumn = memo(
-  ({
-    items,
-    renderItem,
-    columnIndex,
-    columnCount,
-  }: {
-    items: any[];
-    renderItem: (item: any, index: number) => ReactNode;
-    columnIndex: number;
-    columnCount: number;
-  }) => {
-    return (
-      <ColumnContainer>
-        {items.map((item, itemIndex) => {
-          // calc the absolute index for priority
-          const absoluteIndex = columnIndex + itemIndex * columnCount;
-          return renderItem(item, absoluteIndex);
-        })}
-      </ColumnContainer>
-    );
-  }
-);
+  MasonryColumnComponent
+) as typeof MasonryColumnComponent;
 
 interface MasonryGridProps<T> {
   items: T[];
@@ -99,7 +100,7 @@ export const MasonryGrid = <T,>({
         style={{ "--column-count": columnCount } as React.CSSProperties}
       >
         {columns.map((column, colIndex) => (
-          <MasonryColumn
+          <MasonryColumn<T>
             key={`column-${colIndex}`}
             items={column}
             renderItem={renderItem}
