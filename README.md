@@ -22,12 +22,16 @@ This application is a performance-optimized image gallery using React, TypeScrip
 │   │   ├── STYLING-GUIDE.md # Styling best practices
 │   │   └── BFCACHE-GUIDE.md # BFCache optimization guide
 │   ├── @shared/           # Shared utilities and hooks
-│   │   ├── contexts/       # React context providers
-│   │   ├── hooks/          # Custom React hooks
-│   │   └── utils/          # General utilities
-│   ├── components/        # Application-specific components
-│   └── main.tsx           # Application entry point
-├── PERFORMANCE-GUIDE.md   # Performance optimization guide
+│   │   ├── contexts/      # React context providers
+│   │   ├── hooks/         # Custom React hooks
+│   │   └── utils/         # General utilities
+│   ├── @features/         # Features folder
+│   │   ├── gallery/       # Gallery feature
+│   │   ├── photo-details/ # Photo details feature
+│   │   └── search/       # Search feature
+│   ├── components/       # Application-specific components
+│   └── main.tsx          # Application entry point
+├── PERFORMANCE-GUIDE.md  # Performance optimization guide
 └── README.md             # Project documentation
 ```
 
@@ -119,7 +123,7 @@ The application uses the following environment variables:
 | Variable                   | Description                                 | Required | Default            |
 | -------------------------- | ------------------------------------------- | -------- | ------------------ |
 | `VITE_PEXELS_API_KEY`      | API key for Pexels                          | Yes      | -                  |
-| `VITE_UNSPLASH_ACCESS_KEY` | Access key for Unsplash (optional)          | No       | -                  |
+| `VITE_UNSPLASH_ACCESS_KEY` | Access key for Unsplash (optional)          | Yes      | -                  |
 | `VITE_API_CACHE_TIME`      | Cache time for API requests in milliseconds | No       | 300000 (5 minutes) |
 | `VITE_DEFAULT_THEME`       | Default theme (light or dark)               | No       | light              |
 | `VITE_USE_MOCK_DATA`       | Use mock data instead of real API           | No       | false              |
