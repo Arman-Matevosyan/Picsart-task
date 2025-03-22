@@ -6,12 +6,16 @@ import ImageCardSkeleton from "../ImageCardSkeleton";
 interface SkeletonProps {
   height?: number | string;
   style?: React.CSSProperties;
+  "data-testid"?: string;
 }
 
-// mock Skeleton
 vi.mock("@design-system/components", () => ({
-  Skeleton: ({ height, style }: SkeletonProps) => (
-    <div data-testid="mock-skeleton" data-height={height} style={style} />
+  Skeleton: ({ height, style, ...props }: SkeletonProps) => (
+    <div
+      data-testid={props["data-testid"] || "mock-skeleton"}
+      data-height={height}
+      style={style}
+    />
   ),
 }));
 
@@ -19,20 +23,28 @@ describe("ImageCardSkeleton", () => {
   it("renders with default aspect ratio (1.5)", () => {
     renderWithProviders(<ImageCardSkeleton />);
 
-    const skeleton = screen.getByTestId("mock-skeleton");
-    expect(skeleton).toBeInTheDocument();
-    expect(skeleton).toHaveAttribute("data-height", "0");
+    const skeletons = screen.getAllByTestId("mock-skeleton");
+    const imageSkeleton = skeletons.find((skeleton) =>
+      skeleton.style.paddingBottom?.includes("%")
+    );
 
-    expect(parseFloat(skeleton.style.paddingBottom)).toBeCloseTo(66.67, 1);
+    expect(imageSkeleton).toBeInTheDocument();
+    expect(parseFloat(imageSkeleton?.style.paddingBottom || "0")).toBeCloseTo(
+      66.67,
+      1
+    );
   });
 
   it("renders with custom aspect ratio", () => {
     const customAspectRatio = 2;
     renderWithProviders(<ImageCardSkeleton aspectRatio={customAspectRatio} />);
 
-    const skeleton = screen.getByTestId("mock-skeleton");
-    expect(skeleton).toBeInTheDocument();
+    const skeletons = screen.getAllByTestId("mock-skeleton");
+    const imageSkeleton = skeletons.find((skeleton) =>
+      skeleton.style.paddingBottom?.includes("%")
+    );
 
-    expect(skeleton.style.paddingBottom).toBe("50%");
+    expect(imageSkeleton).toBeInTheDocument();
+    expect(imageSkeleton?.style.paddingBottom).toBe("50%");
   });
 });

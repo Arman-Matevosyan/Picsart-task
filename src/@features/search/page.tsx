@@ -5,7 +5,7 @@ import { PageHeader } from "@shared/components/PageHeader";
 import { useInfiniteScroll } from "@shared/hooks";
 import { IPhoto } from "@shared/types";
 import { extractPhotosFromPages } from "@shared/utils";
-import { FC, useCallback } from "react";
+import { FC, useCallback, useMemo } from "react";
 import { useSearchParams } from "react-router-dom";
 import styled from "styled-components";
 import { useSearchPhotos } from "./hooks/useSearchPhotos";
@@ -37,11 +37,20 @@ export const SearchResultsPage: FC = () => {
     error,
   } = useSearchPhotos(query);
 
-  const photos = extractPhotosFromPages(data);
+  const photos = useMemo(() => extractPhotosFromPages(data), [data]);
+
   const renderPhoto = useCallback(
-    (photo: IPhoto) => <ImageCard key={photo.id} photo={photo} />,
+    (photo: IPhoto, index: number) => (
+      <ImageCard
+        key={photo.id}
+        photo={photo}
+        index={index}
+        isPriority={index < 2}
+      />
+    ),
     []
   );
+
   const loadMoreRef = useInfiniteScroll({
     loading: isLoading || isFetchingNextPage,
     hasNextPage,

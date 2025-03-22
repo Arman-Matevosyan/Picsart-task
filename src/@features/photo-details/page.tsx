@@ -7,6 +7,12 @@ import styled from "styled-components";
 import PhotoDetailsSkeleton from "./components/PhotoDetails";
 import { usePhotoDetails } from "./hooks/usePhotoDetails";
 
+interface NetworkInformation {
+  saveData?: boolean;
+  effectiveType?: string;
+  downlink?: number;
+}
+
 const Container = styled.div`
   max-width: 1400px;
   margin: 0 auto;
@@ -131,14 +137,33 @@ export const PhotoDetailsPage: FC = () => {
     return null;
   }
 
-  // Get the best available image URL
-  const getHighQualityImage = () => {
+  const connection =
+    typeof navigator !== "undefined" && "connection" in navigator
+      ? (navigator as { connection: NetworkInformation }).connection
+      : null;
+
+  // get the best available image URL based on device size and network
+  const getOptimalImageUrl = () => {
     if (!photo || !photo.src) return null;
 
-    return photo.src.original || photo.src.large || photo.src.medium;
+    // check if the user is on a slow connection or has data-saver enabled
+    const isSlowConnection =
+      connection &&
+      (connection.saveData ||
+        (connection.effectiveType && /2g/.test(connection.effectiveType)) ||
+        (typeof connection.downlink === "number" && connection.downlink < 0.7)); // Less than 700Kbps
+
+    // for full screen detail view
+    // - on slow connections or mobile medium size
+    // - otherwise use large
+    if (isSlowConnection || window.innerWidth < 768) {
+      return photo.src.medium || photo.src.large;
+    }
+
+    return photo.src.large || photo.src.original;
   };
 
-  const highQualityImageUrl = getHighQualityImage();
+  const optimalImageUrl = getOptimalImageUrl();
 
   if (error) {
     return (
@@ -172,13 +197,18 @@ export const PhotoDetailsPage: FC = () => {
         photo && (
           <DetailsContainer>
             <ImageContainer>
-              {highQualityImageUrl ? (
+              {optimalImageUrl ? (
                 <Image
-                  src={highQualityImageUrl}
+                  src={optimalImageUrl}
                   alt={photo.alt}
                   rounded
+                  width={photo.width}
+                  height={photo.height}
                   aspectRatio={photo.width / photo.height}
                   fit="contain"
+                  priority={true}
+                  quality={85}
+                  sizes="(max-width: 768px) 100vw, 70vw"
                   style={{
                     width: "100%",
                     height: "auto",

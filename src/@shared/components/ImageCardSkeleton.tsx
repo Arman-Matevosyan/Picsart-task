@@ -10,6 +10,19 @@ const SkeletonCard = styled.div`
   width: 100%;
   overflow: hidden;
   border-radius: ${(props) => props.theme.borderRadius.medium};
+  margin-bottom: 16px; // Match the margin in ImageCard component
+  position: relative;
+`;
+
+const SkeletonImage = styled(Skeleton)`
+  width: 100%;
+  height: 0;
+  position: relative;
+  display: block;
+`;
+
+const InfoSkeleton = styled.div`
+  margin-top: 8px;
 `;
 
 const ImageCardSkeleton: FC<ImageCardSkeletonProps> = ({
@@ -17,10 +30,11 @@ const ImageCardSkeleton: FC<ImageCardSkeletonProps> = ({
 }) => {
   return (
     <SkeletonCard>
-      <Skeleton
-        height={0}
-        style={{ paddingBottom: `${(1 / aspectRatio) * 100}%` }}
-      />
+      <SkeletonImage style={{ paddingBottom: `${(1 / aspectRatio) * 100}%` }} />
+      <InfoSkeleton>
+        <Skeleton width="60%" height={14} />
+        <Skeleton width="40%" height={12} style={{ marginTop: "4px" }} />
+      </InfoSkeleton>
     </SkeletonCard>
   );
 };

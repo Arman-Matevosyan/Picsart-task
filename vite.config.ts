@@ -2,48 +2,73 @@ import react from "@vitejs/plugin-react";
 import { visualizer } from "rollup-plugin-visualizer";
 import { defineConfig } from "vite";
 import { compression } from "vite-plugin-compression2";
+import type { BrotliOptions, ZlibOptions } from "zlib";
 
 /**
  * Optimized Vite configuration
  *
  * Optimizations applied:
- * - Brotli and Gzip compression
+ * - Brotli and Gzip compression with optimized settings
  * - Terser minification with aggressive settings
  * - Strategic code splitting for better caching
  * - Bundle analysis for monitoring
  * - Improved CSS optimization
  * - Reduced unused JavaScript
+ * - Text compression for all assets
+ * - Styled-components optimization
  *
  * References:
  * - Vite Official Guide: https://vitejs.dev/guide/build.html
  * - Vite Build Options: https://vitejs.dev/config/build-options.html
  * - Web.dev - LCP: https://web.dev/lcp/
- * - Enable Text Compression: https://web.dev/uses-text-compression/
+ * - Enable Text Compression: https://developer.chrome.com/docs/lighthouse/performance/uses-text-compression
  */
 
 export default defineConfig({
   plugins: [
-    react(),
-    // gzip compression
+    react({
+      babel: {
+        plugins: [
+          [
+            "babel-plugin-styled-components",
+            {
+              displayName: process.env.NODE_ENV !== "production", // only in dev
+              fileName: process.env.NODE_ENV !== "production", // only in dev
+              minify: true,
+              pure: true, // tree-shaking
+              transpileTemplateLiterals: true,
+            },
+          ],
+        ],
+      },
+    }),
+    // gzip compression - widely supported
     compression({
       algorithm: "gzip",
-      exclude: [/\.(br)$/, /\.(gz)$/],
-      threshold: 512, // lower threshold to compress more files
-      deleteOriginalAssets: false, // keep original files for browsers that dont support compression
+      exclude: [/\.(br)$/, /\.(gz)$/, /\.(jpg|jpeg|png|gif|webp)$/],
+      threshold: 256, // Lower threshold to compress more files (256 bytes)
+      compressionOptions: {
+        level: 9, // Maximum compression level for gzip
+      } as ZlibOptions,
+      deleteOriginalAssets: false,
     }),
-    // brotli compression for better compression ratio
+    // brotli compression for better compression ratio (much smaller files than gzip)
     compression({
       algorithm: "brotliCompress",
-      exclude: [/\.(br)$/, /\.(gz)$/],
-      threshold: 512, // Lower threshold to compress more files
-      deleteOriginalAssets: false, // Keep original files
+      exclude: [/\.(br)$/, /\.(gz)$/, /\.(jpg|jpeg|png|gif|webp)$/], // dont compress already compressed formats
+      threshold: 256,
+      compressionOptions: {
+        params: {
+          [0]: 11, // Compression level (0-11)
+        },
+      } as BrotliOptions,
+      deleteOriginalAssets: false,
     }),
-    // bundle analyze monitor size
     visualizer({
       open: false,
       gzipSize: true,
       brotliSize: true,
-      filename: "stats.html", // Save stats to a file
+      filename: "./report/stats.html",
     }),
   ],
   resolve: {
@@ -62,14 +87,14 @@ export default defineConfig({
         drop_console: true,
         drop_debugger: true,
         pure_funcs: ["console.log", "console.info", "console.debug"],
-        passes: 2, // multiple for better minification
-        ecma: 2020, //modern syntax
+        passes: 2,
+        ecma: 2020,
       },
       mangle: {
         safari10: true, // safari compatibility
       },
       format: {
-        comments: false, // remove comments
+        comments: false,
       },
     },
     // increase chunk size
@@ -84,9 +109,8 @@ export default defineConfig({
     },
     rollupOptions: {
       output: {
-        // code splitting
         manualChunks: (id) => {
-          // react core - rarely changes
+          // Core React - needed for initial render
           if (
             id.includes("node_modules/react/") ||
             id.includes("node_modules/react-dom/")
@@ -94,12 +118,12 @@ export default defineConfig({
             return "vendor-react";
           }
 
-          // routing - lazy loaded by main.tsx
+          // Routing - loaded immediately after app mount
           if (id.includes("node_modules/react-router-dom/")) {
             return "vendor-router";
           }
 
-          // API/query functionality - only loaded when needed
+          // API/query functionality - only loaded when needed for data fetching
           if (
             id.includes("node_modules/@tanstack/react-query") ||
             id.includes("node_modules/axios/")
@@ -107,17 +131,22 @@ export default defineConfig({
             return "vendor-api";
           }
 
-          // styling libraries - separate chunk
+          // Styling libraries - needed for styled components
           if (id.includes("node_modules/styled-components/")) {
             return "vendor-styles";
           }
 
-          // UI components that can be reused
+          // Core UI components shared across the app
           if (id.includes("src/@design-system/components")) {
             return "ui-components";
           }
 
-          // feature modules should be in their own chunks
+          // Shared utilities used app-wide
+          if (id.includes("src/@shared/utils")) {
+            return "shared-utils";
+          }
+
+          // Feature modules - each feature in its own chunk for better lazy loading
           if (id.includes("src/@features/gallery")) {
             return "feature-gallery";
           }
@@ -130,23 +159,26 @@ export default defineConfig({
             return "feature-search";
           }
 
+          // SearchBar and related components - lazy loaded when needed
+          if (
+            id.includes("src/@shared/components/SearchBar") ||
+            id.includes("src/@shared/components/DynamicSearchBar")
+          ) {
+            return "search-component";
+          }
+
           return null; // default chunk
         },
-        // minimize code size
         compact: true,
-        // ensure smallest bundle sizes
         minifyInternalExports: true,
-        // add content hash for cache
         entryFileNames: "assets/[name].[hash].js",
         chunkFileNames: "assets/[name].[hash].js",
         assetFileNames: "assets/[name].[hash].[ext]",
       },
     },
-    // disable sourcemap in production smaller build size
+    // disable sourcemap in production for smaller build size
     sourcemap: false,
-    // ensure assets are optimized
     assetsInlineLimit: 4096, // 4kb
-    // report performance issues
     reportCompressedSize: true,
   },
 });

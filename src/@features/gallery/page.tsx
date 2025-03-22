@@ -7,6 +7,7 @@ import {
 import { useInfiniteScroll } from "@shared/hooks";
 import { IPhoto } from "@shared/types";
 import { extractPhotosFromPages } from "@shared/utils";
+import { PerformanceProfiler } from "@shared/utils/Profiler";
 import { FC, useCallback, useMemo } from "react";
 import styled from "styled-components";
 import { useGalleryPhotos } from "./hooks";
@@ -71,16 +72,18 @@ export const GalleryPage: FC = () => {
       {isLoading ? (
         <MasonryGridSkeleton />
       ) : (
-        <MasonryGrid
-          items={photos}
-          renderItem={renderPhoto}
-          loadingElement={
-            isFetchingNextPage && (
-              <div className="loading">Loading more images...</div>
-            )
-          }
-          sentinelElement={<div ref={loadMoreRef} />}
-        />
+        <PerformanceProfiler id="GalleryMasonryGrid">
+          <MasonryGrid
+            items={photos}
+            renderItem={renderPhoto}
+            loadingElement={
+              isFetchingNextPage && (
+                <div className="loading">Loading more images...</div>
+              )
+            }
+            sentinelElement={<div ref={loadMoreRef} />}
+          />
+        </PerformanceProfiler>
       )}
     </Container>
   );

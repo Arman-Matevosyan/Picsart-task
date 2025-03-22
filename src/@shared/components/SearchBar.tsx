@@ -12,6 +12,11 @@ const Form = styled.form`
   width: 100%;
   max-width: 600px;
   margin: 0 auto;
+
+  @media (max-width: 600px) {
+    flex-direction: row;
+    padding: 0 10px;
+  }
 `;
 
 const Input = styled.input`
@@ -30,12 +35,23 @@ const Input = styled.input`
   &:focus {
     border-color: ${(props) => props.theme.colors.primary};
   }
+
+  @media (max-width: 480px) {
+    padding: 8px 12px;
+    font-size: 0.9rem;
+  }
 `;
 
 const SearchButton = styled(Button)`
   border-radius: 0 ${(props) => props.theme.borderRadius.medium}
     ${(props) => props.theme.borderRadius.medium} 0;
   margin-left: -1px;
+
+  @media (max-width: 480px) {
+    padding: 8px 12px;
+    font-size: 0.9rem;
+    white-space: nowrap;
+  }
 `;
 
 export const SearchBar: FC<SearchBarProps> = ({ initialValue = "" }) => {

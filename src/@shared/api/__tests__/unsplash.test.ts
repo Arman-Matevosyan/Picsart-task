@@ -11,7 +11,6 @@ vi.mock("axios", () => ({
   },
 }));
 
-// mock env vars
 vi.mock("import.meta.env", () => ({
   VITE_UNSPLASH_ACCESS_KEY: "mock-unsplash-access-key",
 }));

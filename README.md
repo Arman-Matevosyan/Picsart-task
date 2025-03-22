@@ -1,84 +1,93 @@
-# React + TypeScript + Vite Image Gallery
+# Image Gallery PicsArt Task
 
 This application is a performance-optimized image gallery using React, TypeScript, and Vite. It showcases high-quality photos from Pexels and Unsplash APIs with a focus on performance and user experience.
 
-## Performance Optimization Plan
+## Features
 
-Our performance optimization strategy targets the following key issues:
+- **Optimized Infinite Scroll** - Efficiently loads and renders photos as you scroll
+- **Responsive Layout** - Masonry grid layout that adapts to different screen sizes
+- **Performance Optimized** - Implements best practices for Core Web Vitals
+- **Styled Components** - Consistent theming with performance-optimized styling
+- **Back/Forward Cache Compatible** - Instant navigation with preserved state
+- **Virtualization Support** - Handles large collections of photos efficiently
 
-1. **Largest Contentful Paint (LCP) Optimization** 
-   - Identify and prioritize LCP elements (often an image or large text block)
-   - Add `fetchpriority="high"` to hero images
-   - Remove render-blocking resources
-   - Optimize JS execution before LCP
-   - Set LCP performance budget (<2.5s on mobile)
+## Project Structure
 
-2. **Text Compression**
-   - Enable gzip/Brotli compression for all text resources
-   - Properly serve compressed (.gz/.br) files from the static server
-   - Verify compression via Content-Encoding headers
+```
+├── src/
+│   ├── @design-system/     # Design system components and utilities
+│   │   ├── components/     # Reusable UI components
+│   │   ├── theme/          # Theme configuration and utilities
+│   │   ├── utils/          # Styling utilities
+│   │   ├── STYLING-GUIDE.md # Styling best practices
+│   │   └── BFCACHE-GUIDE.md # BFCache optimization guide
+│   ├── @shared/           # Shared utilities and hooks
+│   │   ├── contexts/       # React context providers
+│   │   ├── hooks/          # Custom React hooks
+│   │   └── utils/          # General utilities
+│   ├── components/        # Application-specific components
+│   └── main.tsx           # Application entry point
+├── PERFORMANCE-GUIDE.md   # Performance optimization guide
+└── README.md             # Project documentation
+```
 
-3. **JavaScript Optimization**
-   - Use production builds for performance testing
-   - Ensure proper minification and tree-shaking
-   - Optimize bundle splitting configuration
-   - Remove source maps in production
+## Architecture Documentation
 
-4. **Code Reduction**
-   - Eliminate unused libraries (react-router-dom, axios, react-query)
-   - Implement dynamic imports for code splitting
-   - Analyze bundle contents to identify bloat
-   - Replace heavy libraries with lighter alternatives when possible
+We maintain detailed guides for various aspects of the application:
 
-5. **Production Deployment Optimization**
-   - Configure CDN and edge caching
-   - Enable server compression
-   - Implement long-term asset caching
-   - Monitor real-user performance
-   - Consider server-side rendering if needed
+- **[Performance Guide](./PERFORMANCE-GUIDE.md)** - Comprehensive performance optimization strategy
+- **[Styling Guide](./src/@design-system/STYLING-GUIDE.md)** - Best practices for using styled-components
+- **[BFCache Guide](./src/@design-system/BFCACHE-GUIDE.md)** - Browser back/forward cache optimization
 
-## Implemented Optimizations
+## Performance Highlights
 
-1. **Production Build Optimization**
-   - Minification and compression (Gzip/Brotli)
-   - Code splitting and tree-shaking
-   - Vendor chunk optimization
+This application implements numerous performance optimizations, including:
 
-2. **Image Optimization**
-   - WebP format usage for smaller file sizes
-   - Responsive image loading with appropriate sizes
-   - Properly prioritized LCP images
-   - Layout shift prevention with aspect ratios
+- Optimized image loading and rendering
+- Efficient state management with React Query
+- Back/forward cache compatibility
+- Responsive and virtualized UI
+- Modern browser features usage
 
-3. **React Rendering Optimization**
-   - Memoized components to prevent unnecessary re-renders
-   - Virtualized grid for efficient rendering
-   - Lazy loading for non-critical components
-
-4. **Loading Performance**
-   - DNS prefetching and preconnect hints
-   - Preloading critical resources
-   - Effective image lazy loading strategy
-
-5. **Back/Forward Cache Compatibility**
-   - Proper event listeners (pageshow instead of unload)
-   - State preservation for instant navigation
+See the [Performance Guide](./PERFORMANCE-GUIDE.md) for detailed information.
 
 ## Scripts
 
 - `npm run dev` - Start development server
-- `npm run build` - Build for production
+- `npm run build` - Build for production (runs TypeScript compiler and builds)
+- `npm run lint` - Run ESLint to check for code issues
 - `npm run preview` - Preview production build locally
+- `npm run preview:compressed` - Build and serve compressed production files
 - `npm run performance` - Run performance tests and measure Core Web Vitals
-- `npm run analyze` - Analyze bundle sizes
+- `npm run test` - Run unit tests
+- `npm run test:watch` - Run tests in watch mode
+- `npm run analyze` - Analyze bundle sizes and open stats visualization
+- `npm run test:perf` - Build and preview for performance testing
+- `npm run test:lighthouse` - Run Lighthouse audit and generate report
+- `npm run dev:mock` - Start development server with mock data
 
 ## Getting Started
 
 1. Clone the repository
 2. Install dependencies with `npm install`
-3. Create a `.env` file with your API keys (see `.env.example`)
+3. **Environment Variables Setup**:
+
+   Set up environment variables as described in the [Environment Variables](#environment-variables) section:
+
+   - For development: Create a local `.env` file
+   - For production: Configure variables in your deployment platform
+   - For development without API keys: Use `npm run dev:mock`
+
 4. Run the development server with `npm run dev`
 5. Build for production with `npm run build`
+
+## API Integration
+
+The application is integrated with the Pexels API for photo data. The authorization is handled with the API key that you must provide in the environment variables. If you encounter `unauthorized` errors when scrolling, please verify:
+
+1. You have a valid Pexels API key in your environment variables
+2. The key is formatted correctly as `VITE_PEXELS_API_KEY=your_key_here` without quotes
+3. You've restarted the server after adding the key
 
 ## References
 
@@ -100,3 +109,26 @@ The performance optimizations in this project are based on best practices from t
 - [Text compression & Code splitting](https://dev.to/mitchatevs/improving-web-performance-with-code-splitting-and-text-compression-1f3h)
 - [Edge Network Compression (Vercel)](https://vercel.com/docs/edge-network/compression)
 - [Rollup Plugin Visualizer](https://github.com/btd/rollup-plugin-visualizer)
+- [React Query Documentation](https://tanstack.com/query/latest/docs/react/overview)
+- [Pexels API Documentation](https://www.pexels.com/api/documentation/)
+
+## Environment Variables
+
+The application uses the following environment variables:
+
+| Variable                   | Description                                 | Required | Default            |
+| -------------------------- | ------------------------------------------- | -------- | ------------------ |
+| `VITE_PEXELS_API_KEY`      | API key for Pexels                          | Yes      | -                  |
+| `VITE_UNSPLASH_ACCESS_KEY` | Access key for Unsplash (optional)          | No       | -                  |
+| `VITE_API_CACHE_TIME`      | Cache time for API requests in milliseconds | No       | 300000 (5 minutes) |
+| `VITE_DEFAULT_THEME`       | Default theme (light or dark)               | No       | light              |
+| `VITE_USE_MOCK_DATA`       | Use mock data instead of real API           | No       | false              |
+| `VITE_PEXELS_PER_PAGE`     | Number of items per page for Pexels API     | No       | 15                 |
+
+An `.env.example` file is provided in the repository as a template for your environment variables. Copy this file to create your `.env` file:
+
+```bash
+cp .env.example .env
+```
+
+Then edit the `.env` file to add your actual API keys.

@@ -2,15 +2,14 @@ import { ApiSources } from "@shared/constants";
 import { IPhoto } from "@shared/types";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import {
-    fetchCuratedPhotos,
-    fetchPexelsPhotoById,
-    fetchUnsplashPhotoById,
-    searchPhotos,
+  fetchCuratedPhotos,
+  fetchPexelsPhotoById,
+  fetchUnsplashPhotoById,
+  searchPhotos,
 } from "../index";
 import * as pexelsApi from "../pexels";
 import * as unsplashApi from "../unsplash";
 
-// mock the API
 vi.mock("../pexels", () => ({
   fetchCuratedPhotos: vi.fn(),
   fetchPhotoById: vi.fn(),

@@ -99,12 +99,12 @@ export const Image: FC<ImageProps> = ({
     const separator = hasParams ? "&" : "?";
     let optimizedUrl = url;
 
-    // asdd quality parameter
     if (quality && quality < 100) {
       optimizedUrl += `${separator}q=${quality}`;
     }
 
     if (url.includes("unsplash.com")) {
+      // unsplash allows WebP format through the fm parameter
       optimizedUrl += `${
         optimizedUrl.includes("?") ? "&" : "?"
       }fm=webp&auto=format`;
@@ -114,12 +114,45 @@ export const Image: FC<ImageProps> = ({
       } else if (fit === "contain") {
         optimizedUrl += "&fit=max";
       }
+    } else if (
+      url.includes("pexels.com") ||
+      url.includes("images.pexels.com")
+    ) {
+      // Pexels API doesn't directly support WebP through URL parameters
+      // but some CDNs automatically serve WebP when the browser supports it
+      // we can add Accept header via the 'imagesrcset' attribute
+
+      if (fit === "cover") {
+        optimizedUrl += `${optimizedUrl.includes("?") ? "&" : "?"}fit=crop`;
+      }
     }
 
     return optimizedUrl;
   };
 
   const optimizedSrc = src ? optimizeImageUrl(src) : src;
+
+  // create srcSet for responsive images if width and height are available
+  const getSrcset = (): string | undefined => {
+    if (!optimizedSrc) return undefined;
+
+    // for Unsplash images, we can create a responsive srcset
+    if (optimizedSrc.includes("unsplash.com") && width && height) {
+      const widths = [400, 800, 1200, 1600, 2000];
+      return widths
+        .map((w) => {
+          const h = Math.round((w * height) / width);
+          return `${optimizedSrc}&w=${w}&h=${h} ${w}w`;
+        })
+        .join(", ");
+    }
+
+    // For Pexels images, we don't currently generate srcset
+    // as their API doesn't support custom dimensions in the same way
+    return undefined;
+  };
+
+  const srcset = getSrcset();
 
   useEffect(() => {
     if (priority && optimizedSrc) {
@@ -134,9 +167,12 @@ export const Image: FC<ImageProps> = ({
         preloadLink.setAttribute("type", "image/webp");
       } else if (optimizedSrc.includes("fm=avif")) {
         preloadLink.setAttribute("type", "image/avif");
+      } else {
+        preloadLink.setAttribute("imagesrcset", srcset || "");
+        preloadLink.setAttribute("imagesizes", sizes);
       }
 
-      // add cache-control hint for browsers
+      // add cache-control for browsers
       preloadLink.setAttribute("crossorigin", "anonymous");
 
       document.head.appendChild(preloadLink);
@@ -147,7 +183,7 @@ export const Image: FC<ImageProps> = ({
         }
       };
     }
-  }, [priority, optimizedSrc]);
+  }, [priority, optimizedSrc, srcset, sizes]);
 
   return (
     <ImageContainer
@@ -167,6 +203,7 @@ export const Image: FC<ImageProps> = ({
         width={width}
         height={height}
         sizes={sizes}
+        srcSet={srcset}
         fetchPriority={priority ? "high" : "auto"}
         decoding={priority ? "sync" : "async"}
         {...props}
